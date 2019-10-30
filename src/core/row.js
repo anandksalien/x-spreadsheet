@@ -190,47 +190,45 @@ class Rows {
     const ndata = {};
     this.each((ri, row) => {
       const nri = parseInt(ri, 10);
-
       this.eachCells(ri, (ci, cell) => {
-        if(cell['text'] && cell['text'].startsWith("=")){
-          cell['text'] = cell['text'].substr(1)
+        if(cell['text'] && cell['text'].startsWith("=")){  // checking if it is a formula
+          cell['text'] = cell['text'].substr(1)            // removing "=" from the formula string
+          let cellText  = cell['text']
           //console.log("Before updating :: ",cell['text'])
-          var numberPattern = /[A-Z]\d+/g;
-          var rangePattern = /[A-Z]\d+[:][A-Z]\d+/g;
-          let rangeValues = cell['text'].match(rangePattern)
-          let formualStr = cell['text']
-          if(rangeValues){
-            rangeValues.map(value=>{
-              formualStr = formualStr.replace(value,'')
+          let rangePattern = /[A-Z]\d+[:][A-Z]\d+/g;       // It will find all range patterns Eg: B23:B26
+          let numberPattern = /[A-Z]\d+/g;                 // It will find all numbers preceded by a charcter Eg: 26 from B26
+          let rangeValuesArr = cellText.match(rangePattern)
+          if(rangeValuesArr){
+            rangeValuesArr.map(value=>{
+              cellText = cellText.replace(value,'')         // once we get a range pattern we remove it from formula string so it won't be evaluated agin in next loop
               let rangeNumbers = value.match(numberPattern)
-              
-              let oldIndex = parseInt(rangeNumbers[1].substr(1))
-              let oldIndex1 = parseInt(rangeNumbers[0].substr(1))
-              console.log(oldIndex1,oldIndex,eri,sri)
-              if(oldIndex == (eri+1) && oldIndex1 == (sri+1)){
-                let updatedCell = cell['text'].replace(new RegExp("\\b"+rangeNumbers[0]+"\\b"),'"#REF!"')
+              let startRange = rangeNumbers[0]              // rangeNumbers is a array of two numbers of range Eg: [23,26] from B23:B26
+              let endRange = rangeNumbers[1]
+              let startRangeIndex = parseInt(startRange.substr(1))
+              let endRangeIndex = parseInt(endRange.substr(1))
+              if(endRangeIndex == (eri+1) && startRangeIndex == (sri+1)){         // If we delete whole range then we add #REF! error in formula
+                let updatedCell = cell['text'].replace(new RegExp("\\b"+startRange+"\\b"),'"#REF!"')
                 cell['text'] = updatedCell
-                updatedCell = cell['text'].replace(new RegExp("\\b"+rangeNumbers[1]+"\\b"),'"#REF!"')
+                updatedCell = cell['text'].replace(new RegExp("\\b"+endRange+"\\b"),'"#REF!"')
                 cell['text'] = updatedCell
-              }else if(oldIndex > (eri+1) || (oldIndex <= (eri+1) && oldIndex >= (sri+1))){
-                let updatedIndexStr = rangeNumbers[1][0] + (oldIndex - n);
-                let updatedCell = cell['text'].replace(new RegExp("\\b"+rangeNumbers[1]+"\\b"),updatedIndexStr)
+              }else if(endRangeIndex > (eri+1) || (endRangeIndex <= (eri+1) && endRangeIndex >= (sri+1))){ // If we delete some part of range then we update the range end index
+                let updatedIndexStr = endRange[0] + (endRangeIndex - n);
+                let updatedCell = cell['text'].replace(new RegExp("\\b"+endRange+"\\b"),updatedIndexStr)
                 cell['text'] = updatedCell
               }
             })
           }
-
-          let values = formualStr.match(numberPattern)
-          if(values){
-              values.map(value=>{
-                let oldIndex = parseInt(value.substr(1))
-                if(oldIndex > (eri+1)){
+          
+          let numbersArr = cellText.match(numberPattern)
+          if(numbersArr){
+            numbersArr.map(value=>{
+                let oldIndex = parseInt(value.substr(1))        // we get the index that needs to be updated Eg: 26 from B26
+                if(oldIndex > (eri+1)){                         // If index is greater than the deleted row index then we updated the refernece
                   let updatedIndexStr = value[0] + (oldIndex - n);
                   let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),updatedIndexStr)
                   cell['text'] = updatedCell
                 }else if(oldIndex <= (eri+1) && oldIndex >= (sri+1)){
                   let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),'"#REF!"')
-                  console.log(updatedCell)
                   cell['text'] = updatedCell
                 }
               })
@@ -247,7 +245,7 @@ class Rows {
       }
     });
     this._ = ndata;
-//    console.log(ndata)
+
     this.len -= n;
   }
 
