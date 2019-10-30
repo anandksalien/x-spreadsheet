@@ -432,6 +432,42 @@ class Draw {
 
   }
   
+  reference_error(box){
+    const { ctx } = this;
+    const { x, y, width } = box;
+    const sx = x + width - 1;
+
+    // To put the  border
+    ctx.save();
+    ctx.beginPath();
+    // Border-Top
+    this.border("thick","#F00");
+    this.line(...box.topxys());
+    // Border-Right
+    this.border("thick","#F00");
+    this.line(...box.rightxys());
+    // Border-Bottom
+    this.border("thick","#F00");
+    this.line(...box.bottomxys());
+    // Border-Left
+    this.border("thick","#F00");
+    this.line(...box.leftxys());
+    ctx.restore();
+
+    // To put the Flag
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(npx(sx - 8), npx(y - 1));
+    ctx.lineTo(npx(sx), npx(y - 1));
+    ctx.lineTo(npx(sx), npx(y + 8));
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255, 0, 0, .65)';
+    ctx.fill();
+    ctx.restore();
+    
+  }
+
+
   rect(box, dtextcb) {
     const { ctx } = this;
     const {
