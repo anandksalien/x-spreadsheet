@@ -288,7 +288,7 @@ class Rows {
           if(numbersArr){
             numbersArr.map(value=>{
                 let oldColIndex = (value[0].charCodeAt(0) - 65) +1;
-                if(oldColIndex > (sci+1)){                         // If index is greater than the deleted row index then we updated the refernece
+                if(oldColIndex >= (sci+1)){                         // If index is greater than the deleted row index then we updated the refernece
                   let updatedIndexStr = String.fromCharCode((oldColIndex-1+n+65)) + value.substr(1);
                   let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),updatedIndexStr)
                   cell['text'] = updatedCell
