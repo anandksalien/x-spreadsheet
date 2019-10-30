@@ -188,15 +188,85 @@ class Rows {
   delete(sri, eri) {
     const n = eri - sri + 1;
     const ndata = {};
+    //console.log(this)
     this.each((ri, row) => {
       const nri = parseInt(ri, 10);
+      //console.log(nri)
+      //console.log(sri,eri,nri,ri,row)
       if (nri < sri) {
+
+        // this.eachCells(ri, (ci, cell) => {
+        //   if(cell['text'] && cell['text'].startsWith("=")){
+        //     cell['text'] = cell['text'].substr(1)
+        //     console.log("Before updating :: ",cell['text'])
+        //     var numberPattern = /[A-Z]\d+/g;
+        //     let values = cell['text'].match(numberPattern)
+        //     values.map(value=>{
+        //       let oldIndex = parseInt(value.substr(1))
+        //       if(oldIndex < (sri+1)){
+        //         let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),0)
+        //         cell['text'] = updatedCell
+        //       }
+        //     })
+        //     cell['text'] = "="+cell['text']
+        //     console.log("After updating ::", cell['text'])
+        //   }
+        // })
+
         ndata[nri] = row;
-      } else if (ri > eri) {
+
+      } else if (nri > eri) {
+        this.eachCells(ri, (ci, cell) => {
+          if(cell['text'] && cell['text'].startsWith("=")){
+            cell['text'] = cell['text'].substr(1)
+            //console.log("Before updating :: ",cell['text'])
+            var numberPattern = /[A-Z]\d+/g;
+            var rangePattern = /[A-Z]\d+[:][A-Z]\d+/g;
+            let rangeValues = cell['text'].match(rangePattern)
+            let formualStr = cell['text']
+            if(rangeValues){
+              rangeValues.map(value=>{
+                formualStr = formualStr.replace(value,'')
+                let rangeNumbers = value.match(numberPattern)
+                
+                let oldIndex = parseInt(rangeNumbers[1].substr(1))
+                let oldIndex1 = parseInt(rangeNumbers[0].substr(1))
+                if(oldIndex == (eri+1) && oldIndex1 == (sri+1)){
+                  let updatedCell = cell['text'].replace(new RegExp("\\b"+rangeNumbers[0]+"\\b"),0)
+                  cell['text'] = updatedCell
+                  updatedCell = cell['text'].replace(new RegExp("\\b"+rangeNumbers[1]+"\\b"),0)
+                  cell['text'] = updatedCell
+                }else if(oldIndex > (eri+1) || (oldIndex <= (eri+1) && oldIndex >= (sri+1))){
+                  let updatedIndexStr = rangeNumbers[1][0] + (oldIndex - n);
+                  let updatedCell = cell['text'].replace(new RegExp("\\b"+rangeNumbers[1]+"\\b"),updatedIndexStr)
+                  cell['text'] = updatedCell
+                }
+              })
+            }
+
+            let values = formualStr.match(numberPattern)
+            if(values){
+                values.map(value=>{
+                  let oldIndex = parseInt(value.substr(1))
+                  if(oldIndex > (eri+1)){
+                    let updatedIndexStr = value[0] + (oldIndex - n);
+                    let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),updatedIndexStr)
+                    cell['text'] = updatedCell
+                  }else if(oldIndex <= (eri+1) && oldIndex >= (sri+1)){
+                    let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),0)
+                    cell['text'] = updatedCell
+                  }
+                })
+            }
+            cell['text'] = "="+cell['text']
+            //console.log("After updating ::", cell['text'])
+          }
+        })
         ndata[nri - n] = row;
       }
     });
     this._ = ndata;
+//    console.log(ndata)
     this.len -= n;
   }
 
@@ -273,6 +343,7 @@ class Rows {
   }
 
   setData(d) {
+    console.log(d)
     if (d.len) {
       this.len = d.len;
       delete d.len;

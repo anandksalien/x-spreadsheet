@@ -799,6 +799,7 @@ export default class DataProxy {
       const {
         rows, merges, selector, cols,
       } = this;
+      console.log(type,this)
       const { range } = selector;
       const {
         sri, sci, eri, eci,
@@ -814,9 +815,7 @@ export default class DataProxy {
         size = csize;
         cols.len -= 1;
       }
-      // console.log('type:', type, ', si:', si, ', size:', size);
       merges.shift(type, si, -size, (ri, ci, rn, cn) => {
-        // console.log('ri:', ri, ', ci:', ci, ', rn:', rn, ', cn:', cn);
         const cell = rows.getCell(ri, ci);
         cell.merge[0] += rn;
         cell.merge[1] += cn;
