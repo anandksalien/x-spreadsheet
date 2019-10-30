@@ -208,9 +208,9 @@ class Rows {
               let oldIndex1 = parseInt(rangeNumbers[0].substr(1))
               console.log(oldIndex1,oldIndex,eri,sri)
               if(oldIndex == (eri+1) && oldIndex1 == (sri+1)){
-                let updatedCell = cell['text'].replace(new RegExp("\\b"+rangeNumbers[0]+"\\b"),0)
+                let updatedCell = cell['text'].replace(new RegExp("\\b"+rangeNumbers[0]+"\\b"),'"#REF!"')
                 cell['text'] = updatedCell
-                updatedCell = cell['text'].replace(new RegExp("\\b"+rangeNumbers[1]+"\\b"),0)
+                updatedCell = cell['text'].replace(new RegExp("\\b"+rangeNumbers[1]+"\\b"),'"#REF!"')
                 cell['text'] = updatedCell
               }else if(oldIndex > (eri+1) || (oldIndex <= (eri+1) && oldIndex >= (sri+1))){
                 let updatedIndexStr = rangeNumbers[1][0] + (oldIndex - n);
@@ -229,7 +229,8 @@ class Rows {
                   let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),updatedIndexStr)
                   cell['text'] = updatedCell
                 }else if(oldIndex <= (eri+1) && oldIndex >= (sri+1)){
-                  let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),0)
+                  let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),'"#REF!"')
+                  console.log(updatedCell)
                   cell['text'] = updatedCell
                 }
               })
