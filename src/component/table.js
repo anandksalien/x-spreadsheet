@@ -78,6 +78,32 @@ function renderCell(rindex, cindex) {
     reference_error = regex_pattern.test(cell.text)
   }
 
+  if(cell.text){
+    if(cell.text[0] === "="){
+      console.log("Cell text",cell.text)
+      let str_array = cell.text.split('"')
+      if(str_array.length>1){
+        let temp_string="" ;
+        // temp_string+='"'
+        for(let i=0;i<str_array.length;i++){
+          if(i%2==0){
+            str_array[i]=str_array[i].replace(/\s/g,'')
+            
+          }else{
+            //Do Nothing
+          }
+          temp_string+=str_array[i]
+          if(i != str_array.length-1){
+            temp_string+= '"'
+          }
+        }
+        cell.text = temp_string;
+      }
+      else{
+        cell.text=cell.text.replace(/\s/g,'')
+      }
+    }
+  }
   const style = data.getCellStyleOrDefault(nrindex, cindex);
   // console.log('style:', style);
   const dbox = getDrawBox.call(this, rindex, cindex);
@@ -97,6 +123,10 @@ function renderCell(rindex, cindex) {
     const font = Object.assign({}, style.font);
     font.size = getFontSizePxByPt(font.size);
     // console.log('style:', style);
+    if(reference_error){
+      cellText="#REF!"
+    }
+    
     const break_interval = draw.text(cellText, dbox, {
       align: style.align,
       valign: style.valign,

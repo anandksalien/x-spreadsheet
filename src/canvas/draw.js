@@ -469,6 +469,8 @@ class Draw {
     ctx.restore();
 
     //To show #REF! when there is a reference error the formula is not lost
+    ctx.save();
+    ctx.beginPath();
     this.text("#REF!",box,{
       "align": "left",
       "valign": "middle",
@@ -482,6 +484,9 @@ class Draw {
       "strike": false,
       "underline": false
     })
+
+    ctx.restore();
+
   }
 
   rect(box, dtextcb) {
