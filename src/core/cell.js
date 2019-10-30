@@ -189,21 +189,24 @@ const evalSuffixExpr = (srcStack, formulaMap, cellRender, cellList) => {
 };
 
 const cellRender = (src, formulaMap, getCellText, cellList = []) => {
+  let regex_pattern = new RegExp("#REF!")
   if (src[0] === '=') {
     let stack=[] ;
     if(src.substring(1).startsWith("IF(")){
-      let expr = src.substring(4,src.length-1)
-      let split_parts = expr.split(",")
-      let org_stack = infixExprToSuffixExpr(src.substring(1))
-      // let postfix_part1 = infixExprToSuffixExpr(split_parts[0])
-      let postfix_part2 = infixExprToSuffixExpr(split_parts[1])
-      let postfix_part3 = infixExprToSuffixExpr(split_parts[2])
-      stack.push(org_stack[0])
-      stack.push(org_stack[1])
-      stack.push(org_stack[2])
-      Array.prototype.push.apply(stack,postfix_part2);
-      Array.prototype.push.apply(stack,postfix_part3);
-      stack.push(["IF",3])
+      if(! regex_pattern.test(src)){
+        let expr = src.substring(4,src.length-1)
+        let split_parts = expr.split(",")
+        let org_stack = infixExprToSuffixExpr(src.substring(1))
+        // let postfix_part1 = infixExprToSuffixExpr(split_parts[0])
+        let postfix_part2 = infixExprToSuffixExpr(split_parts[1])
+        let postfix_part3 = infixExprToSuffixExpr(split_parts[2])
+        stack.push(org_stack[0])
+        stack.push(org_stack[1])
+        stack.push(org_stack[2])
+        Array.prototype.push.apply(stack,postfix_part2);
+        Array.prototype.push.apply(stack,postfix_part3);
+        stack.push(["IF",3])
+      }
     }
     else if(src.substring(1).startsWith("MAX(")){
       let expr = src.substring(5,src.length-1)
