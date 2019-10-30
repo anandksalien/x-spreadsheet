@@ -73,7 +73,7 @@ function renderCell(rindex, cindex) {
   }
 
   let reference_error = false;
-  let regex_pattern = new RegExp("#REF")
+  let regex_pattern = new RegExp("#REF!")
   if(cell !== null){
     reference_error = regex_pattern.test(cell.text)
   }

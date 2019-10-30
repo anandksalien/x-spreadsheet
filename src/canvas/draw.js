@@ -436,6 +436,9 @@ class Draw {
     const { ctx } = this;
     const { x, y, width } = box;
     const sx = x + width - 1;
+    
+    // To clear the previous text
+    this.clear()
 
     // To put the  border
     ctx.save();
@@ -464,9 +467,22 @@ class Draw {
     ctx.fillStyle = 'rgba(255, 0, 0, .65)';
     ctx.fill();
     ctx.restore();
-    
-  }
 
+    //To show #REF! when there is a reference error the formula is not lost
+    this.text("#REF!",box,{
+      "align": "left",
+      "valign": "middle",
+      "font": {
+        "name": "Arial",
+        "size": 13,
+        "bold": false,
+        "italic": false
+      },
+      "color": "#0a0a0a",
+      "strike": false,
+      "underline": false
+    })
+  }
 
   rect(box, dtextcb) {
     const { ctx } = this;
