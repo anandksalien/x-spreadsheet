@@ -176,6 +176,26 @@ class Rows {
     const ndata = {};
     this.each((ri, row) => {
       let nri = parseInt(ri, 10);
+      this.eachCells(ri, (ci, cell) => {
+        if(cell['text'] && cell['text'].startsWith("=")){  // checking if it is a formula
+          cell['text'] = cell['text'].substr(1)            // removing "=" from the formula string
+          let cellText  = cell['text']
+          let numberPattern = /[A-Z]\d+/g;                 // It will find all numbers preceded by a charcter Eg: 26 from B26
+          let numbersArr = cellText.match(numberPattern)
+          if(numbersArr){
+            numbersArr = numbersArr.reverse()
+            numbersArr.map(value=>{
+                let oldIndex = parseInt(value.substr(1))        // we get the index that needs to be updated Eg: 26 from B26
+                if(oldIndex >= (sri+1)){                         // If index is greater than the deleted row index then we updated the refernece
+                  let updatedIndexStr = value[0] + (oldIndex + n);
+                  let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),updatedIndexStr)
+                  cell['text'] = updatedCell
+                }
+              })
+          }
+          cell['text'] = "="+cell['text']
+        }
+      })
       if (nri >= sri) {
         nri += n;
       }
@@ -214,6 +234,11 @@ class Rows {
               }else if(endRangeIndex > (eri+1) || (endRangeIndex <= (eri+1) && endRangeIndex >= (sri+1))){ // If we delete some part of range then we update the range end index
                 let updatedIndexStr = endRange[0] + (endRangeIndex - n);
                 let updatedCell = cell['text'].replace(new RegExp("\\b"+endRange+"\\b"),updatedIndexStr)
+                cell['text'] = updatedCell
+              }
+              if(startRangeIndex > (eri+1) ||(startRangeIndex <= (eri+1) && startRangeIndex >= (sri+1))){
+                let updatedIndexStr = startRange[0] + (startRangeIndex - n);
+                let updatedCell = cell['text'].replace(new RegExp("\\b"+startRange+"\\b"),updatedIndexStr)
                 cell['text'] = updatedCell
               }
             })
