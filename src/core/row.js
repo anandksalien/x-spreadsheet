@@ -279,6 +279,26 @@ class Rows {
       const rndata = {};
       this.eachCells(ri, (ci, cell) => {
         let nci = parseInt(ci, 10);
+
+        if(cell['text'] && cell['text'].startsWith("=")){  // checking if it is a formula
+          cell['text'] = cell['text'].substr(1)            // removing "=" from the formula string
+          let cellText  = cell['text']
+          let numberPattern = /[A-Z]\d+/g;                 // It will find all numbers preceded by a charcter Eg: 26 from B26
+          let numbersArr = cellText.match(numberPattern)
+          if(numbersArr){
+            numbersArr.map(value=>{
+                let oldColIndex = (value[0].charCodeAt(0) - 65) +1;
+                if(oldColIndex > (sci+1)){                         // If index is greater than the deleted row index then we updated the refernece
+                  let updatedIndexStr = String.fromCharCode((oldColIndex-1+n+65)) + value.substr(1);
+                  let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),updatedIndexStr)
+                  cell['text'] = updatedCell
+                }
+            })
+          }
+          cell['text'] = "="+cell['text']
+        }
+
+
         if (nci >= sci) {
           nci += n;
         }
@@ -294,6 +314,26 @@ class Rows {
       const rndata = {};
       this.eachCells(ri, (ci, cell) => {
         const nci = parseInt(ci, 10);
+        if(cell['text'] && cell['text'].startsWith("=")){  // checking if it is a formula
+          cell['text'] = cell['text'].substr(1)            // removing "=" from the formula string
+          let cellText  = cell['text']
+          let numberPattern = /[A-Z]\d+/g;                 // It will find all numbers preceded by a charcter Eg: 26 from B26
+          let numbersArr = cellText.match(numberPattern)
+          if(numbersArr){
+            numbersArr.map(value=>{
+                let oldColIndex = (value[0].charCodeAt(0) - 65) +1;
+                if(oldColIndex > (eci+1)){                         // If index is greater than the deleted row index then we updated the refernece
+                  let updatedIndexStr = String.fromCharCode((oldColIndex-1-n+65)) + value.substr(1);
+                  let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),updatedIndexStr)
+                  cell['text'] = updatedCell
+                }else if(oldColIndex <= (eci+1) && oldColIndex >= (sci+1)){
+                  let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),'"#REF!"')
+                  cell['text'] = updatedCell
+                }
+            })
+          }
+          cell['text'] = "="+cell['text']
+        }
         if (nci < sci) {
           rndata[nci] = cell;
         } else if (nci > eci) {
