@@ -72,6 +72,12 @@ function renderCell(rindex, cindex) {
     export_disabled = true
   }
 
+  let reference_error = false;
+  let regex_pattern = new RegExp("#REF")
+  if(cell !== null){
+    reference_error = regex_pattern.test(cell.text)
+  }
+
   const style = data.getCellStyleOrDefault(nrindex, cindex);
   // console.log('style:', style);
   const dbox = getDrawBox.call(this, rindex, cindex);
@@ -119,6 +125,10 @@ function renderCell(rindex, cindex) {
 
     if(frozen && export_disabled){
       draw.frozen_export_disabled(dbox);
+    }
+
+    if(reference_error){
+      draw.reference_error(dbox);
     }
     
   });
