@@ -135,43 +135,48 @@ function overlayerMousescroll(evt) {
   const { verticalScrollbar, horizontalScrollbar, data } = this;
   const { top } = verticalScrollbar.scroll();
   const { left } = horizontalScrollbar.scroll();
-  // console.log('evt:::', evt.wheelDelta, evt.detail * 40);
+  // console.log('evt:::',evt, evt.wheelDelta, evt.detail * 40);
 
   const { rows, cols } = data;
 
   // deltaY for vertical delta
   let { deltaY } = evt;
+  const { deltaX } = evt;
   // console.log('deltaX', deltaX, 'evt.detail', evt.detail);
   if (evt.detail) deltaY = evt.detail * 40;
-  if (deltaY > 0) {
-    // up
-    const ri = data.scroll.ri + 1;
-    if (ri < rows.len) {
-      verticalScrollbar.move({ top: top + rows.getHeight(ri) - 1 });
-    }
-  } else {
-    // down
-    const ri = data.scroll.ri - 1;
-    if (ri >= 0) {
-      verticalScrollbar.move({ top: ri === 0 ? 0 : top - rows.getHeight(ri) });
+  
+  if(Math.abs(deltaY)>Math.abs(deltaX) && Math.abs(deltaX)==0 ){
+    if (deltaY > 0) {
+      // up
+      const ri = data.scroll.ri + 1;
+      if (ri < rows.len) {
+        verticalScrollbar.move({ top: top + rows.getHeight(ri) - 1 });
+      }
+    } else {
+      // down
+      const ri = data.scroll.ri - 1;
+      if (ri >= 0) {
+        verticalScrollbar.move({ top: ri === 0 ? 0 : top - rows.getHeight(ri) });
+      }
     }
   }
-
+  
   // deltaX for Mac horizontal scroll
-  const { deltaX } = evt;
-  if (deltaX > 0) {
-    // left
-    const ci = data.scroll.ci + 1;
-    if (ci < cols.len) {
-      horizontalScrollbar.move({ left: left + cols.getWidth(ci) - 1 });
-    }
-  } else {
-    // right
-    const ci = data.scroll.ci - 1;
-    if (ci >= 0) {
-      horizontalScrollbar.move({
-        left: ci === 0 ? 0 : left - cols.getWidth(ci),
-      });
+  if(Math.abs(deltaX)>Math.abs(deltaY) && Math.abs(deltaY)==0){
+    if (deltaX > 0) {
+      // left
+      const ci = data.scroll.ci + 1;
+      if (ci < cols.len) {
+        horizontalScrollbar.move({ left: left + cols.getWidth(ci) - 1 });
+      }
+    } else {
+      // right
+      const ci = data.scroll.ci - 1;
+      if (ci >= 0) {
+        horizontalScrollbar.move({
+          left: ci === 0 ? 0 : left - cols.getWidth(ci),
+        });
+      }
     }
   }
 }
