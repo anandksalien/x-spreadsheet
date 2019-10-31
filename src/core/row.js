@@ -177,23 +177,8 @@ class Rows {
     this.each((ri, row) => {
       let nri = parseInt(ri, 10);
       this.eachCells(ri, (ci, cell) => {
-        if(cell['text'] && cell['text'].startsWith("=")){  // checking if it is a formula
-          cell['text'] = cell['text'].substr(1)            // removing "=" from the formula string
-          let cellText  = cell['text']
-          let numberPattern = /[A-Z]\d+/g;                 // It will find all numbers preceded by a charcter Eg: 26 from B26
-          let numbersArr = cellText.match(numberPattern)
-          if(numbersArr){
-            numbersArr = numbersArr.reverse()
-            numbersArr.map(value=>{
-                let oldIndex = parseInt(value.substr(1))        // we get the index that needs to be updated Eg: 26 from B26
-                if(oldIndex >= (sri+1)){                         // If index is greater than the deleted row index then we updated the refernece
-                  let updatedIndexStr = value[0] + (oldIndex + n);
-                  let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),updatedIndexStr)
-                  cell['text'] = updatedCell
-                }
-              })
-          }
-          cell['text'] = "="+cell['text']
+        if(this.isFormula(cell['text'])){
+          cell['text'] = this.updateRefAfterInsert("row",cell['text'],sri,n);
         }
       })
       if (nri >= sri) {
@@ -211,10 +196,9 @@ class Rows {
     this.each((ri, row) => {
       const nri = parseInt(ri, 10);
       this.eachCells(ri, (ci, cell) => {
-        if(cell['text'] && cell['text'].startsWith("=")){  // checking if it is a formula
+        if(this.isFormula(cell['text'])){  // checking if it is a formula
           cell['text'] = cell['text'].substr(1)            // removing "=" from the formula string
           let cellText  = cell['text']
-          //console.log("Before updating :: ",cell['text'])
           let rangePattern = /[A-Z]\d+[:][A-Z]\d+/g;       // It will find all range patterns Eg: B23:B26
           let numberPattern = /[A-Z]\d+/g;                 // It will find all numbers preceded by a charcter Eg: 26 from B26
           let rangeValuesArr = cellText.match(rangePattern)
@@ -227,18 +211,18 @@ class Rows {
               let startRangeIndex = parseInt(startRange.substr(1))
               let endRangeIndex = parseInt(endRange.substr(1))
               if(endRangeIndex == (eri+1) && startRangeIndex == (sri+1)){         // If we delete whole range then we add #REF! error in formula
-                let updatedCell = cell['text'].replace(new RegExp("\\b"+startRange+"\\b"),'"#REF!"')
+                let updatedCell =  this.updateCellText(cell['text'],startRange,'"#REF!"') //cell['text'].replace(new RegExp("\\b"+startRange+"\\b"),'"#REF!"')
                 cell['text'] = updatedCell
-                updatedCell = cell['text'].replace(new RegExp("\\b"+endRange+"\\b"),'"#REF!"')
+                updatedCell = this.updateCellText(cell['text'],endRange,'"#REF!"') //cell['text'].replace(new RegExp("\\b"+endRange+"\\b"),'"#REF!"')
                 cell['text'] = updatedCell
               }else if(endRangeIndex > (eri+1) || (endRangeIndex <= (eri+1) && endRangeIndex >= (sri+1))){ // If we delete some part of range then we update the range end index
                 let updatedIndexStr = endRange[0] + (endRangeIndex - n);
-                let updatedCell = cell['text'].replace(new RegExp("\\b"+endRange+"\\b"),updatedIndexStr)
+                let updatedCell = this.updateCellText(cell['text'],endRange,updatedIndexStr) //cell['text'].replace(new RegExp("\\b"+endRange+"\\b"),updatedIndexStr)
                 cell['text'] = updatedCell
               }
               if(startRangeIndex > (eri+1) ||(startRangeIndex <= (eri+1) && startRangeIndex >= (sri+1))){
                 let updatedIndexStr = startRange[0] + (startRangeIndex - n);
-                let updatedCell = cell['text'].replace(new RegExp("\\b"+startRange+"\\b"),updatedIndexStr)
+                let updatedCell = this.updateCellText(cell['text'],startRange,updatedIndexStr) //cell['text'].replace(new RegExp("\\b"+startRange+"\\b"),updatedIndexStr)
                 cell['text'] = updatedCell
               }
             })
@@ -250,16 +234,15 @@ class Rows {
                 let oldIndex = parseInt(value.substr(1))        // we get the index that needs to be updated Eg: 26 from B26
                 if(oldIndex > (eri+1)){                         // If index is greater than the deleted row index then we updated the refernece
                   let updatedIndexStr = value[0] + (oldIndex - n);
-                  let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),updatedIndexStr)
+                  let updatedCell = this.updateCellText(cell['text'],value,updatedIndexStr) //cell['text'].replace(new RegExp("\\b"+value+"\\b"),updatedIndexStr)
                   cell['text'] = updatedCell
                 }else if(oldIndex <= (eri+1) && oldIndex >= (sri+1)){
-                  let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),'"#REF!"')
+                  let updatedCell = this.updateCellText(cell['text'],value,'"#REF!"') //cell['text'].replace(new RegExp("\\b"+value+"\\b"),'"#REF!"')
                   cell['text'] = updatedCell
                 }
               })
           }
           cell['text'] = "="+cell['text']
-          //console.log("After updating ::", cell['text'])
         }
       })
 
@@ -279,26 +262,9 @@ class Rows {
       const rndata = {};
       this.eachCells(ri, (ci, cell) => {
         let nci = parseInt(ci, 10);
-
-        if(cell['text'] && cell['text'].startsWith("=")){  // checking if it is a formula
-          cell['text'] = cell['text'].substr(1)            // removing "=" from the formula string
-          let cellText  = cell['text']
-          let numberPattern = /[A-Z]\d+/g;                 // It will find all numbers preceded by a charcter Eg: 26 from B26
-          let numbersArr = cellText.match(numberPattern)
-          if(numbersArr){
-            numbersArr.map(value=>{
-                let oldColIndex = (value[0].charCodeAt(0) - 65) +1;
-                if(oldColIndex >= (sci+1)){                         // If index is greater than the deleted row index then we updated the refernece
-                  let updatedIndexStr = String.fromCharCode((oldColIndex-1+n+65)) + value.substr(1);
-                  let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),updatedIndexStr)
-                  cell['text'] = updatedCell
-                }
-            })
-          }
-          cell['text'] = "="+cell['text']
+        if(this.isFormula(cell['text'])){
+          cell['text'] = this.updateRefAfterInsert("column",cell['text'],sci,n)
         }
-
-
         if (nci >= sci) {
           nci += n;
         }
@@ -314,7 +280,7 @@ class Rows {
       const rndata = {};
       this.eachCells(ri, (ci, cell) => {
         const nci = parseInt(ci, 10);
-        if(cell['text'] && cell['text'].startsWith("=")){  // checking if it is a formula
+        if(this.isFormula(cell['text'])){  // checking if it is a formula
           cell['text'] = cell['text'].substr(1)            // removing "=" from the formula string
           let cellText  = cell['text']
           let numberPattern = /[A-Z]\d+/g;                 // It will find all numbers preceded by a charcter Eg: 26 from B26
@@ -324,10 +290,10 @@ class Rows {
                 let oldColIndex = (value[0].charCodeAt(0) - 65) +1;
                 if(oldColIndex > (eci+1)){                         // If index is greater than the deleted row index then we updated the refernece
                   let updatedIndexStr = String.fromCharCode((oldColIndex-1-n+65)) + value.substr(1);
-                  let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),updatedIndexStr)
+                  let updatedCell = this.updateCellText(cell['text'],value,updatedIndexStr) //cell['text'].replace(new RegExp("\\b"+value+"\\b"),updatedIndexStr)
                   cell['text'] = updatedCell
                 }else if(oldColIndex <= (eci+1) && oldColIndex >= (sci+1)){
-                  let updatedCell = cell['text'].replace(new RegExp("\\b"+value+"\\b"),'"#REF!"')
+                  let updatedCell =this.updateCellText(cell['text'],value,'"#REF!"') // cell['text'].replace(new RegExp("\\b"+value+"\\b"),'"#REF!"')
                   cell['text'] = updatedCell
                 }
             })
@@ -342,6 +308,43 @@ class Rows {
       });
       row.cells = rndata;
     });
+  }
+
+  updateCellText(str, oldValue, newValue){
+    return str.replace(new RegExp("\\b"+oldValue+"\\b"),newValue)
+  }
+
+  isFormula(str){
+    return str && str.startsWith("=") ? true : false;
+  }
+
+  updateRefAfterInsert(type,cellText,startIndex,n){
+    cellText = cellText.substr(1)            // removing "=" from the formula string
+    let numberPattern = /[A-Z]\d+/g;                 // It will find all numbers preceded by a charcter Eg: 26 from B26
+    let numbersArr = cellText.match(numberPattern)
+    if(numbersArr){
+      numbersArr = numbersArr.reverse()
+      numbersArr.map(value=>{
+          let oldIndex = ''; 
+          if(type == "row"){
+            oldIndex = parseInt(value.substr(1)) - 1; // we get the row that needs to be updated Eg: 26 from B26
+          }else if(type == "column"){
+            oldIndex = value[0].charCodeAt(0) - 65;   // we get the column that needs to be updated Eg: B from B26
+          }
+          if(oldIndex >= startIndex){   
+            let updatedIndexStr = '';    
+            if(type == "row"){
+              updatedIndexStr = value[0] + (oldIndex + 1 + n);       
+            }else if(type == "column"){
+              updatedIndexStr = String.fromCharCode((oldIndex+n+65)) + value.substr(1); 
+            }
+            let updatedCell = this.updateCellText(cellText,value,updatedIndexStr) 
+            cellText = updatedCell
+          }
+      })
+    }
+    cellText = "="+cellText
+    return cellText;
   }
 
   // what: all | text | format | merge
