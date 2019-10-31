@@ -797,7 +797,7 @@ export default class DataProxy {
   delete(type) {
     this.changeData(() => {
       const {
-        rows, merges, selector, cols,
+        rows, merges, selector, cols,validations
       } = this;
       console.log(type,this)
       const { range } = selector;
@@ -808,9 +808,9 @@ export default class DataProxy {
       let si = sri;
       let size = rsize;
       if (type === 'row') {
-        rows.delete(sri, eri);
+        rows.delete(sri, eri,validations);
       } else if (type === 'column') {
-        rows.deleteColumn(sci, eci);
+        rows.deleteColumn(sci, eci,validations);
         si = range.sci;
         size = csize;
         cols.len -= 1;

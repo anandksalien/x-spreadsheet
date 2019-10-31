@@ -191,7 +191,7 @@ class Rows {
     this.updateValidationReferences(validations,"row",n,sri)
   }
 
-  delete(sri, eri) {
+  delete(sri, eri,validations) {
     const n = eri - sri + 1;
     const ndata = {};
     this.each((ri, row) => {
@@ -256,6 +256,8 @@ class Rows {
     this._ = ndata;
 
     this.len -= n;
+
+    this.updateValidationWhenDeleted(validations,"row",n,sri,eri)
   }
 
   insertColumn(sci, n = 1,validations) {
@@ -277,7 +279,7 @@ class Rows {
     this.updateValidationReferences(validations,"column",n,sci)
   }
 
-  deleteColumn(sci, eci) {
+  deleteColumn(sci, eci , validations) {
     const n = eci - sci + 1;
     this.each((ri, row) => {
       const rndata = {};
@@ -338,6 +340,7 @@ class Rows {
       });
       row.cells = rndata;
     });
+    this.updateValidationWhenDeleted(validations,"column",n,sci,eci)
   }
 
   updateCellText(str, oldValue, newValue){
@@ -375,6 +378,79 @@ class Rows {
           }
           updated_ref.push(oldValue)//At this point the old value will be updated
         }
+        value.refs = updated_ref
+      }
+    );
+  }
+
+  updateValidationWhenDeleted(validations,type,n,startIndex,endIndex){
+
+    Object.entries(validations._).forEach(  
+      ([key, value]) => {
+        let references = value.refs
+        let updated_ref =[]
+        references.map((reference,index)=>{
+          let oldValue = reference
+          let rangePattern = /[A-Z]\d+[:][A-Z]\d+/g;       // It will find all range patterns Eg: B23:B26
+          let numberPattern = /[A-Z]\d+/g;                 // It will find all numbers preceded by a charcter Eg: 26 from B26
+          let rangeValuesArr = reference.match(rangePattern)
+          if(rangeValuesArr){
+            rangeValuesArr.map(value=>{
+              reference = reference.replace(value,'')
+              let rangeNumbers = value.match(numberPattern)
+              let startRange = rangeNumbers[0]              // rangeNumbers is a array of two numbers of range Eg: [23,26] from B23:B26
+              let endRange = rangeNumbers[1]
+              let startRangeIndex =''
+              let endRangeIndex = ''
+              if(type=="row"){
+                startRangeIndex = parseInt(startRange.substr(1))
+                endRangeIndex = parseInt(endRange.substr(1))
+              }else if (type=="column"){
+                startRangeIndex = (startRange[0].charCodeAt(0) - 65) +1;
+                endRangeIndex = (endRange[0].charCodeAt(0) - 65) +1 ; 
+              }
+              
+
+              
+              if(endRangeIndex == (endIndex+1) && startRangeIndex == (startIndex+1)){         // If we delete whole range then we add #REF! error in formula
+                oldValue=''
+              }else if(endRangeIndex > (endIndex+1) || (endRangeIndex <= (endIndex+1) && endRangeIndex >= (startIndex+1))){ // If we delete some part of range then we update the range end index  
+                let updatedIndexStr = ''
+                if(type=="row"){
+                  updatedIndexStr = endRange[0] + (endRangeIndex - n);
+                }else if (type=="column"){
+                  updatedIndexStr = String.fromCharCode((endRangeIndex-1-n+65)) + endRange.substr(1);
+                }
+                oldValue = this.updateCellText(oldValue,endRange,updatedIndexStr) 
+              }
+            })
+          }
+
+          let numbersArr = reference.match(numberPattern)
+          if(numbersArr){
+            numbersArr = numbersArr.reverse()
+            numbersArr.map(value=>{
+                let oldIndex = ''; 
+                if(type == "row"){
+                  oldIndex = parseInt(value.substr(1))-1; // we get the row that needs to be updated Eg: 26 from B26
+                }else if(type == "column"){
+                  oldIndex = value[0].charCodeAt(0) - 65;   // we get the column that needs to be updated Eg: B from B26
+                }
+                if(oldIndex > startIndex){   
+                  let updatedIndexStr = '';    
+                  if(type == "row"){
+                    updatedIndexStr = value[0] + (oldIndex + 1 - n);       
+                  }else if(type == "column"){
+                    updatedIndexStr = String.fromCharCode((oldIndex-n+65)) + value.substr(1); 
+                  } 
+                  oldValue=oldValue.replace(new RegExp("\\b"+value+"\\b"),updatedIndexStr)
+                }else if(oldIndex == startIndex){
+                  oldValue=''
+                }
+            })
+          }
+          updated_ref.push(oldValue)//At this point the old value will be updated
+        })
         value.refs = updated_ref
       }
     );
