@@ -184,8 +184,11 @@ class Rows {
       if (nri >= sri) {
         nri += n;
       }
+      console.log(ndata)
+      console.log(ndata[nri])
       ndata[nri] = row;
     });
+    console.log(this)
     this._ = ndata;
     this.len += n;
   }
@@ -265,6 +268,7 @@ class Rows {
         if(this.isFormula(cell['text'])){
           cell['text'] = this.updateRefAfterInsert("column",cell['text'],sci,n)
         }
+        console.log(cell)
         if (nci >= sci) {
           nci += n;
         }
@@ -280,10 +284,37 @@ class Rows {
       const rndata = {};
       this.eachCells(ri, (ci, cell) => {
         const nci = parseInt(ci, 10);
-        if(this.isFormula(cell['text'])){  // checking if it is a formula
-          cell['text'] = cell['text'].substr(1)            // removing "=" from the formula string
+        if(this.isFormula(cell['text'])){  
+          cell['text'] = cell['text'].substr(1)            
           let cellText  = cell['text']
-          let numberPattern = /[A-Z]\d+/g;                 // It will find all numbers preceded by a charcter Eg: 26 from B26
+          let numberPattern = /[A-Z]\d+/g;  
+          let rangePattern = /[A-Z]\d+[:][A-Z]\d+/g; 
+          let rangeValuesArr = cellText.match(rangePattern)
+          if(rangeValuesArr){
+            rangeValuesArr.map(value=>{
+              cellText = cellText.replace(value,'')         
+              let rangeNumbers = value.match(numberPattern)
+              let startRange = rangeNumbers[0]              
+              let endRange = rangeNumbers[1]
+              let startRangeIndex = (startRange[0].charCodeAt(0) - 65) +1;
+              let endRangeIndex = (endRange[0].charCodeAt(0) - 65) +1 ; 
+              if(endRangeIndex == (eci+1) && startRangeIndex == (sci+1)){         
+                let updatedCell =  this.updateCellText(cell['text'],startRange,'"#REF!"') 
+                cell['text'] = updatedCell
+                updatedCell = this.updateCellText(cell['text'],endRange,'"#REF!"') 
+                cell['text'] = updatedCell
+              }else if(endRangeIndex > (eci+1) || (endRangeIndex <= (eci+1) && endRangeIndex >= (sci+1))){ 
+                let updatedIndexStr = String.fromCharCode((endRangeIndex-1-n+65)) + endRange.substr(1);
+                let updatedCell = this.updateCellText(cell['text'],endRange,updatedIndexStr) 
+                cell['text'] = updatedCell
+              }
+              if(startRangeIndex > (eci+1) ||(startRangeIndex <= (eci+1) && startRangeIndex >= (sci+1))){
+                let updatedIndexStr = String.fromCharCode((startRangeIndex-1-n+65)) + startRange.substr(1);
+                let updatedCell = this.updateCellText(cell['text'],startRange,updatedIndexStr) 
+                cell['text'] = updatedCell
+              }
+            })
+          }
           let numbersArr = cellText.match(numberPattern)
           if(numbersArr){
             numbersArr.map(value=>{
