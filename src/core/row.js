@@ -172,7 +172,7 @@ class Rows {
     this._ = ncellmm;
   }
 
-  insert(sri, n = 1) {
+  insert(sri, n = 1,validations) {
     const ndata = {};
     this.each((ri, row) => {
       let nri = parseInt(ri, 10);
@@ -184,13 +184,11 @@ class Rows {
       if (nri >= sri) {
         nri += n;
       }
-      console.log(ndata)
-      console.log(ndata[nri])
       ndata[nri] = row;
     });
-    console.log(this)
     this._ = ndata;
     this.len += n;
+    this.updateValidationReferences(validations,"row",n,sri)
   }
 
   delete(sri, eri) {
@@ -260,7 +258,8 @@ class Rows {
     this.len -= n;
   }
 
-  insertColumn(sci, n = 1) {
+  insertColumn(sci, n = 1,validations) {
+    console.log("validations",validations)
     this.each((ri, row) => {
       const rndata = {};
       this.eachCells(ri, (ci, cell) => {
@@ -268,7 +267,6 @@ class Rows {
         if(this.isFormula(cell['text'])){
           cell['text'] = this.updateRefAfterInsert("column",cell['text'],sci,n)
         }
-        console.log(cell)
         if (nci >= sci) {
           nci += n;
         }
@@ -276,6 +274,7 @@ class Rows {
       });
       row.cells = rndata;
     });
+    this.updateValidationReferences(validations,"column",n,sci)
   }
 
   deleteColumn(sci, eci) {
@@ -344,6 +343,43 @@ class Rows {
   updateCellText(str, oldValue, newValue){
     return str.replace(new RegExp("\\b"+oldValue+"\\b"),newValue)
   }
+
+  updateValidationReferences(validations,type,n,startIndex){
+    Object.entries(validations._).forEach(  
+      ([key, value]) => {
+        let references = value.refs
+        let updated_ref = []
+        for (let reference of references){
+          let oldValue = reference
+          let numberPattern = /[A-Z]\d+/g;                 // It will find all numbers preceded by a charcter Eg: 26 from B26
+          let numbersArr = reference.match(numberPattern)
+          if(numbersArr){
+            numbersArr = numbersArr.reverse()
+            numbersArr.map(value=>{
+                let oldIndex = ''; 
+                if(type == "row"){
+                  oldIndex = parseInt(value.substr(1)) - 1; // we get the row that needs to be updated Eg: 26 from B26
+                }else if(type == "column"){
+                  oldIndex = value[0].charCodeAt(0) - 65;   // we get the column that needs to be updated Eg: B from B26
+                }
+                if(oldIndex >= startIndex){   
+                  let updatedIndexStr = '';    
+                  if(type == "row"){
+                    updatedIndexStr = value[0] + (oldIndex + 1 + n);       
+                  }else if(type == "column"){
+                    updatedIndexStr = String.fromCharCode((oldIndex+n+65)) + value.substr(1); 
+                  } 
+                  oldValue=oldValue.replace(new RegExp("\\b"+value+"\\b"),updatedIndexStr)
+                }
+            })
+          }
+          updated_ref.push(oldValue)//At this point the old value will be updated
+        }
+        value.refs = updated_ref
+      }
+    );
+  }
+
 
   isFormula(str){
     return str && str.startsWith("=") ? true : false;

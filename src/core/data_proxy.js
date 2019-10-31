@@ -776,12 +776,12 @@ export default class DataProxy {
   insert(type, n = 1) {
     this.changeData(() => {
       const { sri, sci } = this.selector.range;
-      const { rows, merges, cols } = this;
+      const { rows, merges, cols,validations } = this;
       let si = sri;
       if (type === 'row') {
-        rows.insert(sri, n);
+        rows.insert(sri, n,validations);
       } else if (type === 'column') {
-        rows.insertColumn(sci, n);
+        rows.insertColumn(sci, n,validations);
         si = sci;
         cols.len += 1;
       }
