@@ -80,7 +80,6 @@ function renderCell(rindex, cindex) {
 
   if(cell.text){
     if(cell.text[0] === "="){
-      console.log("Cell text",cell.text)
       let str_array = cell.text.split('"')
       if(str_array.length>1){
         let temp_string="" ;
