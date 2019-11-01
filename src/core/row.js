@@ -261,7 +261,6 @@ class Rows {
   }
 
   insertColumn(sci, n = 1,validations) {
-    console.log("validations",validations)
     this.each((ri, row) => {
       const rndata = {};
       this.eachCells(ri, (ci, cell) => {
@@ -409,23 +408,34 @@ class Rows {
                 startRangeIndex = (startRange[0].charCodeAt(0) - 65) +1;
                 endRangeIndex = (endRange[0].charCodeAt(0) - 65) +1 ; 
               }
-              
-
-              
-              if(endRangeIndex == (endIndex+1) && startRangeIndex == (startIndex+1)){         // If we delete whole range then we add #REF! error in formula
+              if(endRangeIndex == (endIndex+1) && startRangeIndex == (startIndex+1)){   
+                // If we delete whole range then we add #REF! error in formula
                 oldValue=''
-              }else if(endRangeIndex > (endIndex+1) || (endRangeIndex <= (endIndex+1) && endRangeIndex >= (startIndex+1))){ // If we delete some part of range then we update the range end index  
+              }else if (endRangeIndex <= (endIndex+1) && startRangeIndex >= (startIndex)){// When we delete the selected row/col as a part of multiple row/col deletion
+                oldValue=''
+              }else if(endRangeIndex > (endIndex+1) || (endRangeIndex <= (endIndex+1) && endRangeIndex >= (startIndex+1))){ // If we delete some part of range then we update the range end index 
                 let updatedIndexStr = ''
                 if(type=="row"){
                   updatedIndexStr = endRange[0] + (endRangeIndex - n);
                 }else if (type=="column"){
                   updatedIndexStr = String.fromCharCode((endRangeIndex-1-n+65)) + endRange.substr(1);
                 }
-                oldValue = this.updateCellText(oldValue,endRange,updatedIndexStr) 
+                oldValue = this.updateCellText(oldValue,endRange,updatedIndexStr)
+                
+                // Update the start range index too
+                if(startRangeIndex > (endIndex)){
+                  if(type=="row"){
+                    updatedIndexStr = startRange[0] + (startRangeIndex - n);
+                  }else if (type=="column"){
+                    updatedIndexStr = String.fromCharCode((startRangeIndex-1-n+65)) + startRange.substr(1);
+                  }
+                  oldValue = this.updateCellText(oldValue,startRange,updatedIndexStr)
+                }
               }
             })
           }
-
+          
+          
           let numbersArr = reference.match(numberPattern)
           if(numbersArr){
             numbersArr = numbersArr.reverse()
@@ -436,7 +446,7 @@ class Rows {
                 }else if(type == "column"){
                   oldIndex = value[0].charCodeAt(0) - 65;   // we get the column that needs to be updated Eg: B from B26
                 }
-                if(oldIndex > startIndex){   
+                if(oldIndex > startIndex && oldIndex > endIndex){   
                   let updatedIndexStr = '';    
                   if(type == "row"){
                     updatedIndexStr = value[0] + (oldIndex + 1 - n);       
@@ -444,7 +454,7 @@ class Rows {
                     updatedIndexStr = String.fromCharCode((oldIndex-n+65)) + value.substr(1); 
                   } 
                   oldValue=oldValue.replace(new RegExp("\\b"+value+"\\b"),updatedIndexStr)
-                }else if(oldIndex == startIndex){
+                }else if(oldIndex >= startIndex && oldIndex <= endIndex ){
                   oldValue=''
                 }
             })
