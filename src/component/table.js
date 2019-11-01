@@ -119,7 +119,7 @@ function renderCell(rindex, cindex) {
       cellText = _cell.render(cell.text || '', formulam, (y, x) => (data.getCellTextOrDefault(x, y)));
     }
     catch(err){
-      cellText="#ERROR!"
+      cellText="#INVALID!"
       style.color="#fe0000"
     }
     
