@@ -409,10 +409,9 @@ class Rows {
                 endRangeIndex = (endRange[0].charCodeAt(0) - 65) +1 ; 
               }
 
-              if(endRangeIndex == (endIndex+1) && startRangeIndex == (startIndex+1)){   
-                // If we delete whole range then we add #REF! error in formula
+              if(endRangeIndex == (endIndex+1) && startRangeIndex == (startIndex+1)){// If we delete whole range then we add #REF! error in formula
                 oldValue=''
-              }else if (endRangeIndex <= (endIndex+1) && startRangeIndex >= (startIndex)){// When we delete the selected row/col as a part of multiple row/col deletion
+              }else if (endRangeIndex < (endIndex+1) && startRangeIndex > (startIndex+1)){// When we delete the selected row/col as a part of multiple row/col deletion.Selection are includes more than the validation area.
                 oldValue=''
               }else if(endRangeIndex > (endIndex+1) || (endRangeIndex <= (endIndex+1) && endRangeIndex >= (startIndex+1))){ // If we delete some part of range then we update the range end index 
                 let updatedIndexStr = ''
