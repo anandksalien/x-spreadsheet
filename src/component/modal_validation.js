@@ -221,6 +221,10 @@ export default class ModalValidation extends Modal {
       }
       this.criteriaSelected(type);
       this.criteriaOperatorSelected(operator);
+      if(type=='list' || type=='email' || type=='phone'){
+        minvf.hide()
+        maxvf.hide()
+      }
     }
     this.show();
   }

@@ -2,8 +2,8 @@ import { t } from '../locale/locale';
 import helper from './helper';
 
 const rules = {
-  phone: /^[1-9]\d{10}$/,
-  email: /w+([-+.]w+)*@w+([-.]w+)*.w+([-.]w+)*/,
+  phone: /(([+][(]?[0-9]{1,3}[)]?)|([(]?[0-9]{4}[)]?))\s*[)]?[-\s\.]?[(]?[0-9]{1,3}[)]?([-\s\.]?[0-9]{3})([-\s\.]?[0-9]{3,4})/,
+  email: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
 };
 
 function returnMessage(flag, key, ...arg) {
@@ -68,7 +68,7 @@ export default class Validator {
     if (type === 'list') {
       return returnMessage(this.values().includes(v), 'notIn');
     }
-    if (operator) {
+    if (operator && type!='phone' && type!='email') {
       const v1 = this.parseValue(v);
       if (operator === 'be') {
         const [min, max] = value;
