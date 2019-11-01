@@ -408,6 +408,7 @@ class Rows {
                 startRangeIndex = (startRange[0].charCodeAt(0) - 65) +1;
                 endRangeIndex = (endRange[0].charCodeAt(0) - 65) +1 ; 
               }
+
               if(endRangeIndex == (endIndex+1) && startRangeIndex == (startIndex+1)){   
                 // If we delete whole range then we add #REF! error in formula
                 oldValue=''
@@ -415,19 +416,37 @@ class Rows {
                 oldValue=''
               }else if(endRangeIndex > (endIndex+1) || (endRangeIndex <= (endIndex+1) && endRangeIndex >= (startIndex+1))){ // If we delete some part of range then we update the range end index 
                 let updatedIndexStr = ''
-                if(type=="row"){
-                  updatedIndexStr = endRange[0] + (endRangeIndex - n);
-                }else if (type=="column"){
-                  updatedIndexStr = String.fromCharCode((endRangeIndex-1-n+65)) + endRange.substr(1);
+                if(endRangeIndex >= (startIndex+1) && endRangeIndex <= (endIndex+1)){//This case is hit when the selection starts after the validation cells and ends after the validation actually ends.
+                  if(type=="row"){
+                    updatedIndexStr = endRange[0] + (startIndex);
+                  }else if (type=="column"){
+                    updatedIndexStr = String.fromCharCode((startIndex-1+65)) + endRange.substr(1);
+                  }
+                  oldValue = this.updateCellText(oldValue,endRange,updatedIndexStr)
+
+                }else{
+                  if(type=="row"){
+                    updatedIndexStr = endRange[0] + (endRangeIndex - n);
+                  }else if (type=="column"){
+                    updatedIndexStr = String.fromCharCode((endRangeIndex-1-n+65)) + endRange.substr(1);
+                  }
+                  oldValue = this.updateCellText(oldValue,endRange,updatedIndexStr)
+
                 }
-                oldValue = this.updateCellText(oldValue,endRange,updatedIndexStr)
                 
                 // Update the start range index too
-                if(startRangeIndex > (endIndex)){
+                if(startRangeIndex > (endIndex+1)){
                   if(type=="row"){
                     updatedIndexStr = startRange[0] + (startRangeIndex - n);
                   }else if (type=="column"){
                     updatedIndexStr = String.fromCharCode((startRangeIndex-1-n+65)) + startRange.substr(1);
+                  }
+                  oldValue = this.updateCellText(oldValue,startRange,updatedIndexStr)
+                }else if (startRangeIndex >= (startIndex+1) && startRangeIndex <= (endIndex+1)){ // This case is hit when the selection starts before the validation starting and ends before the validation ends
+                  if(type=="row"){
+                    updatedIndexStr = startRange[0] + ((startIndex)+1);
+                  }else if (type=="column"){
+                    updatedIndexStr = String.fromCharCode(((startIndex)+65)) + startRange.substr(1);
                   }
                   oldValue = this.updateCellText(oldValue,startRange,updatedIndexStr)
                 }
