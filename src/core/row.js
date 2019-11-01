@@ -358,6 +358,7 @@ class Rows {
           if(numbersArr){
             numbersArr = numbersArr.reverse()
             numbersArr.map(value=>{
+                let dummyValue = oldValue
                 let oldIndex = ''; 
                 if(type == "row"){
                   oldIndex = parseInt(value.substr(1)) - 1; // we get the row that needs to be updated Eg: 26 from B26
@@ -372,6 +373,9 @@ class Rows {
                     updatedIndexStr = String.fromCharCode((oldIndex+n+65)) + value.substr(1); 
                   } 
                   oldValue=oldValue.replace(new RegExp("\\b"+value+"\\b"),updatedIndexStr)
+                }
+                if (oldIndex == startIndex){
+                  updated_ref.push(dummyValue)
                 }
             })
           }
