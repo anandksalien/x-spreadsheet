@@ -605,6 +605,7 @@ function sheetInitEvents() {
   // modal validation
   modalValidation.change = (action, ...args) => {
     if (action === 'save') {
+      data.removeValidation();
       data.addValidation(...args);
     } else {
       data.removeValidation();
