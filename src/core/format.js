@@ -49,7 +49,36 @@ const baseFormats = [
     title: tf('format.percent'),
     type: 'number',
     label: '10.12%',
-    render: v => `${v*100}%`,
+    render: v => {
+      if(typeof(v) == "string"){
+        if(v.search("%") != -1){
+          let s=v.replace("%"," ")
+          return `${formatNumberRender(s)}%`
+        }else{
+          return `${formatNumberRender(v*100)}%`
+        }
+      }else{
+        return `${formatNumberRender(v*100)}%`
+      }
+    },
+  },
+  {
+    key: 'percent2',
+    title: tf('format.percent2'),
+    type: 'number',
+    label: '10.123%',
+    render: v => {
+      if(typeof(v) == "string"){
+        if(v.search("%") != -1){
+          let s=v.replace("%"," ")
+          return `${formatNumberRender(s,3)}%`
+        }else{
+          return `${formatNumberRender(v*100,3)}%`
+        }
+      }else{
+        return `${formatNumberRender(v*100,3)}%`
+      }
+    },
   },
   {
     key: 'rmb',

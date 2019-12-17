@@ -134,13 +134,15 @@ const evalSuffixExpr = (srcStack, formulaMap, cellRender, cellList) => {
   // console.log(':::::formulaMap:', formulaMap);
   // console.log("srcstack",srcStack)
   for (let i = 0; i < srcStack.length; i += 1) {
-    // console.log(':::>>>', srcStack[i]);
     if(srcStack[i]!== undefined){
       const expr = srcStack[i];
     const fc = expr[0];
     if (expr === '+') {
       const top = stack.pop();
       stack.push(Number(stack.pop()) + Number(top));
+    } else if ( expr === '%'){
+      const top = stack.pop()
+      stack.push(Number(top)/100);
     } else if (expr === '-') {
       if (stack.length === 1) {
         const top = stack.pop();

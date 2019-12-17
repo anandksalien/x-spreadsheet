@@ -47,6 +47,7 @@ export default {
     number: 'Number',
     number2 :'Number (Precision = 3)',
     percent: 'Percent',
+    percent2 :'Percent (Precision = 3)',
     rmb: 'RMB',
     usd: 'USD',
     eur: 'EUR',
