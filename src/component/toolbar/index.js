@@ -178,6 +178,7 @@ export default class Toolbar {
     if (this.isHide) return;
     const { data } = this;
     const style = data.getSelectedCellStyle();
+    const styles = data.styles;
     const cell = data.getSelectedCell();
     // console.log('canUndo:', data.canUndo());
     this.undoEl.setState(!data.canUndo());
@@ -201,9 +202,13 @@ export default class Toolbar {
     // console.log('freeze is Active:', data.freezeIsActive());
     this.freezeEl.setState(data.freezeIsActive());
     if (cell) {
-      if (cell.format) {
-        this.formatEl.setState(cell.format);
+      if (styles[cell.style] && styles[cell.style].format) {
+        this.formatEl.setState(styles[cell.style].format);
+      }else{
+        this.formatEl.setState('normal');
       }
+    }else{
+      this.formatEl.setState('normal');
     }
   }
 }
