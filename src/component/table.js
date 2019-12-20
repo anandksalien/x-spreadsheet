@@ -69,7 +69,11 @@ function renderCell(rindex, cindex) {
   
   let percentage = false;
   if(cell.text && cell.text.search('%') != -1){
-    percentage = true
+    let val = cell.text.replace('%','')
+    if(!isNaN(val)){
+      console.log("sadadasasdasd")
+      percentage = true
+    }
   }
 
   let export_disabled = false;
