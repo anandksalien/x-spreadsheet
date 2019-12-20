@@ -434,7 +434,6 @@ class Draw {
     ctx.fill();
     ctx.restore();
     
-    
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(npx(sx - 8), npx(y - 1));
