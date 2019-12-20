@@ -140,9 +140,6 @@ const evalSuffixExpr = (srcStack, formulaMap, cellRender, cellList) => {
     if (expr === '+') {
       const top = stack.pop();
       stack.push(Number(stack.pop()) + Number(top));
-    } else if ( expr === '%'){
-      const top = stack.pop()
-      stack.push(Number(top)/100);
     } else if (expr === '-') {
       if (stack.length === 1) {
         const top = stack.pop();

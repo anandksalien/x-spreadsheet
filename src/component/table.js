@@ -67,6 +67,11 @@ function renderCell(rindex, cindex) {
     frozen = true
   }
   
+  let percentage = false;
+  if(cell.text && cell.text.search('%') != -1){
+    percentage = true
+  }
+
   let export_disabled = false;
   if("printable" in cell && cell.printable == false){
     export_disabled = true
@@ -166,6 +171,10 @@ function renderCell(rindex, cindex) {
 
     if(reference_error){
       draw.reference_error(dbox);
+    }
+
+    if(percentage){
+      draw.percentage_error(dbox)
     }
     
   });

@@ -389,6 +389,21 @@ class Draw {
     ctx.restore();
   }
 
+  percentage_error(box) {
+    const { ctx } = this;
+    const { x, y, width } = box;
+    const sx = x + width - 1;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(npx(sx - 8), npx(y - 1));
+    ctx.lineTo(npx(sx), npx(y - 1));
+    ctx.lineTo(npx(sx), npx(y + 8));
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(0, 0, 0, .85)';
+    ctx.fill();
+    ctx.restore();
+  }
+
   export_disabled(box) {
     const { ctx } = this;
     const { x, y, width } = box;
